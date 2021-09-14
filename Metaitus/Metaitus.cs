@@ -11,74 +11,44 @@ namespace Metaitus
         private int nextBodyId = 0;
         private Dictionary<int, Body> bodies = new Dictionary<int, Body>();
 
-        private Stopwatch clockTicksPerUpdateCounter = new Stopwatch();
-        private Stopwatch clockTicksPerWorldTickCounter = new Stopwatch();
-        private long clockTicksPerWorldTick;
-        private long clockTicksCount = 0;
-        public float SecondsPerTick { get; private set; } = 0;
-        public float TargetTPS { get; private set; }
-        public bool IsAutoTPSEnabled { get; private set; } = false;
+        public float targetTPS;
+        public float timeScale = 1;
+        private float time = 0;
 
         public World(IWorldListener worldListener, float targetTPS)
         {
             this.worldListener = worldListener;
-            TargetTPS = targetTPS;
-        }
-
-        public void Start()
-        {
-            clockTicksPerUpdateCounter.Start();
-            clockTicksPerWorldTickCounter.Start();
+            this.targetTPS = targetTPS;
         }
 
         public void Tick(float timestep)
         {
             foreach (KeyValuePair<int, Body> body in bodies)
             {
-                body.Value.Tick(timestep);
+                body.Value.Tick(timestep * timeScale);
                 worldListener.UpdateBody(body.Key, body.Value.position);
             }
         }
         public void Update(float deltaTime)
         {
-            clockTicksPerUpdateCounter.Stop();
-            double secondsPerUpdate = (clockTicksPerUpdateCounter.ElapsedTicks / 10000000);
-            //double updatesPerSecond
-            //if (secondsPerUpdate != 0)
-                //updatesPerSecond = 1 / secondsPerUpdate;
-            clockTicksPerUpdateCounter.Restart();
-            //if (IsAutoTPSEnabled)
-            //{
-                //clockTicksPerWorldTick = (long)(1 / (updatesPerSecond * 0.8d)) * 10000000;
-            //}
-            //else
-            //{
-                clockTicksPerWorldTick = (1 / ((long)TargetTPS)) * 10000000;
-            //}
-            clockTicksPerWorldTickCounter.Stop();
-            clockTicksCount += clockTicksPerWorldTickCounter.ElapsedTicks;
-            clockTicksPerWorldTickCounter.Restart();
-            if (clockTicksCount >= clockTicksPerWorldTick)
+
+            float secondsPerTick = 1 / targetTPS;
+            if (deltaTime >= secondsPerTick) worldListener.Message("Target TPS too fast!!!");
+            time += deltaTime;
+            if (time >= secondsPerTick)
             {
-                SecondsPerTick = clockTicksCount / 10000000;
-                clockTicksCount -= clockTicksPerWorldTick;
-                //if (clockTicksCount >= clockTicksPerWorldTick)
-                //{
-                    // add skipping time or get better
-                    //IsAutoTPSEnabled = true;
-                    //worldListener.Message($"Enabled AutoTPS!");
-                //}
-                //else
-                //{
-                    //IsAutoTPSEnabled = false;
-                    //worldListener.Message($"Disabled AutoTPS!");
-                //}
-                Tick(SecondsPerTick);
+                time -= secondsPerTick;
+                if (time >= secondsPerTick)
+                {
+                    worldListener.Message($"Skipping {time} seconds!");
+                    time = 0;
+                }
+                Tick(secondsPerTick);
             }
         }
         public void UpdateTargetTPS(float targetTPS)
         {
-            TargetTPS = targetTPS;
+            this.targetTPS = targetTPS;
         }
 
         public void AddBody(Body body)
@@ -86,6 +56,11 @@ namespace Metaitus
             bodies.Add(nextBodyId, body);
             worldListener.NewBody(nextBodyId);
             nextBodyId++;
+        }
+
+        public Body GetBody(int bodyId)
+        {
+            return bodies[bodyId];
         }
 
         public void RemoveBody(int bodyId)
@@ -100,15 +75,29 @@ namespace Metaitus
         public Vector2 position;
         public Vector2 velocity;
 
-        public Body(Vector2 position, Vector2 velocity)
+        public float drag;
+        public bool gravity;
+        public float gravityScale;
+
+        public Body(Vector2 position, Vector2 velocity, float drag = 0, bool gravity = false, float gravityScale = 1)
         {
             this.position = position;
             this.velocity = velocity;
+            this.drag = drag;
+            this.gravity = gravity;
+            this.gravityScale = gravityScale;
         }
 
         public void Tick(float timestep)
         {
+            if (gravity) AddForce(Vector2.down * 9.8f * gravityScale * timestep);
+            velocity *= 1 - (timestep * drag);
             position += velocity * timestep;
+        }
+
+        public void AddForce(Vector2 force)
+        {
+            velocity += force;
         }
 
         public override string ToString()
@@ -122,6 +111,7 @@ namespace Metaitus
         public float x, y;
 
         public static Vector2 zero = new Vector2(0, 0);
+        public static Vector2 down = new Vector2(0, -1);
 
         public Vector2(float x, float y)
         {
