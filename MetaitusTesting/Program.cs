@@ -22,6 +22,8 @@ namespace MetaitusTesting
                 world.Update(deltaTime);
                 Thread.Sleep(1);
             }
+
+            // For circles colliding, radius^2+radius^2 >= distance^2 between circles
         }
     }
 }
