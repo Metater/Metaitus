@@ -72,32 +72,63 @@ namespace Metaitus
 
     public class Body : ITickable
     {
-        public Vector2 position;
-        public Vector2 velocity;
+        public Vector2 position = Vector2.zero;
+        public Vector2 velocity = Vector2.zero;
 
-        public float drag;
-        public bool gravity;
-        public float gravityScale;
+        public bool dragEnabled = false;
+        public float dragScale = 0;
 
-        public Body(Vector2 position, Vector2 velocity, float drag = 0, bool gravity = false, float gravityScale = 1)
+        public Dictionary<string, Collider> colliders = new Dictionary<string, Collider>();
+
+        private Queue<Vector2> forceQueue = new Queue<Vector2>();
+        private Dictionary<string, Vector2> accelerations = new Dictionary<string, Vector2>();
+
+        #region BuilderMethods
+        public Body SetPosition(Vector2 position)
         {
             this.position = position;
-            this.velocity = velocity;
-            this.drag = drag;
-            this.gravity = gravity;
-            this.gravityScale = gravityScale;
+            return this;
         }
+        public Body SetVelocity(Vector2 velocity)
+        {
+            this.velocity = velocity;
+            return this;
+        }
+        public Body SetAcceleration(string name, Vector2 acceleration)
+        {
+            if (accelerations.ContainsKey(name))
+                accelerations[name] = acceleration;
+            else
+                accelerations.Add(name, acceleration);
+            return this;
+        }
+        public Body SetGravity(bool gravityEnabled, float gravityScale)
+        {
+            if (gravityEnabled)
+                SetAcceleration("gravity", Vector2.down * 9.8f * gravityScale);
+            else
+                accelerations.Remove("gravity");
+                return this;
+        }
+        public Body SetDrag(bool dragEnabled, float dragScale)
+        {
+            this.dragEnabled = dragEnabled;
+            this.dragScale = dragScale;
+            return this;
+        }
+        #endregion BuilderMethods
 
         public void Tick(float timestep)
         {
-            if (gravity) AddForce(Vector2.down * 9.8f * gravityScale * timestep);
-            velocity *= 1 - (timestep * drag);
+            foreach (Vector2 acceleration in accelerations.Values) AddForce(acceleration * timestep);
+            while (forceQueue.Count != 0) velocity += forceQueue.Dequeue();
+            if (dragEnabled) velocity *= 1 - (timestep * dragScale);
             position += velocity * timestep;
         }
 
         public void AddForce(Vector2 force)
         {
-            velocity += force;
+            forceQueue.Enqueue(force);
         }
 
         public override string ToString()

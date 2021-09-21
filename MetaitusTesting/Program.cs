@@ -11,7 +11,14 @@ namespace MetaitusTesting
         {
             WorldListener worldListener = new WorldListener();
             World world = new World(worldListener, 10);
-            world.AddBody(new Body(Vector2.zero, new Vector2(1f, 10f)));
+
+            Body body = new Body()
+                .SetPosition(Vector2.zero)
+                .SetVelocity(new Vector2(1f, 10f))
+                .SetDrag(true, 1)
+                .SetGravity(true, 1);
+
+            world.AddBody(body);
             Stopwatch deltaTimeStopwatch = new Stopwatch();
             deltaTimeStopwatch.Start();
             while (!Console.KeyAvailable)
