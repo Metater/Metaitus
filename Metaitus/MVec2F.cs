@@ -2,7 +2,7 @@ namespace Metaitus
 {
     public struct MVec2F
     {
-        public const MVec2F zero = new MVec2F(0, 0);
+        public static MVec2F zero = new MVec2F(0, 0);
 
         public float x, y;
 
