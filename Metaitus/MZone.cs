@@ -1,7 +1,7 @@
 namespace Metaitus
 {
-    public class World
+    public class MZone
     {
-        
+
     }
 }
