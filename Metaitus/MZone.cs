@@ -48,6 +48,6 @@ namespace Metaitus
 
         // recursively despawn and spawn entities
 
-        
+        MQuadtree tree = new MQuadtree(new MBox(0, 0, 4294967295, 4294967295));
     }
 }
