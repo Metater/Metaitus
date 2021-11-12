@@ -6,7 +6,7 @@ namespace Metaitus
 {
     public class MQuadtree
     {
-        public MBox box;
+        public readonly MBox box;
         public readonly MQuadtree parent;
         public readonly MQuadtree[] tree = new MQuadtree[4];
 
@@ -22,10 +22,16 @@ namespace Metaitus
             this.parent = parent;
         }
 
-        public MQuadtree AddCorner(int corner)
+        public MQuadtree AddCornerInsidePoint(uint x, uint y)
         {
-            tree[corner] = box.GetCorner(corner);
-            return tree[corner];
+            MQuadtree corner = null;
+            for (int i = 0; i < 4; i++)
+            {
+                MBox cornerBox = box.GetCorner(i);
+                if (cornerBox.PointInside(x, y))
+                    corner = MQuadtree(cornerBox, this);
+            }
+            return corner;
         }
     }
 }

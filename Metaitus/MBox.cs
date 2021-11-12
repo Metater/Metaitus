@@ -3,7 +3,8 @@ namespace Metaitus
     public struct MBox
     {
         // 1: BL, 2: TR
-        public uint x1, y1, x2, y2;
+        public readonly uint x1, y1, x2, y2;
+        public uint HalfLength => (x2 - x1) / 2;
 
         public MBox(uint x1, uint y1, uint x2, uint y2)
         {
@@ -20,22 +21,17 @@ namespace Metaitus
 
         public MBox GetCorner(int corner)
         {
-            // 0 1
-            // 2 3
+            uint hl = HalfLength;
             switch (corner)
             {
                 case 0:
-                    return new MBox()
-                    break;
+                    return new MBox(x1, y1 + hl, x2 - hl, y2);
+                case 1:
+                    return new MBox(x1 + hl, y1 + hl, x2, y2);
                 case 2:
-
-                    break;
-                case 3:
-
-                    break;
+                    return new MBox(x1, y1, x2 - hl, y2 - hl);
                 default:
-                    
-                    break;
+                    return new MBox(x1 + hl, y1, x2, y2 - hl);
             }
         }
     } 

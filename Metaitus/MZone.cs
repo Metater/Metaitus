@@ -47,5 +47,7 @@ namespace Metaitus
         // cache all entities inside of each quad tree square
 
         // recursively despawn and spawn entities
+
+        
     }
 }
