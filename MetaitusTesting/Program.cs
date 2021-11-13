@@ -10,7 +10,7 @@ namespace MetaitusTesting
         static void Main(string[] args)
         {
             MZone zone = new MZone();
-            zone.TryGetGrid(17592186044415d, 17592186044415d, out _);
+            zone.TryGetGrid(17179869183d, 17179869183d, out _);
             /*
             WorldListener worldListener = new WorldListener();
             World world = new World(worldListener, 10);

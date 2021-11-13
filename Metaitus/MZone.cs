@@ -55,9 +55,12 @@ namespace Metaitus
 
         public bool TryGetGrid(double x, double y, out MGrid16x16 grid)
         {
-            ulong ulx = (ulong)((x / 4096d) + 2147483648d);
+            if (x < -17179869184d || x > 17179869183d) throw new ArgumentException("X out of bounds!");
+            if (y < -17179869184d || y > 17179869183d) throw new ArgumentException("Y out of bounds!");
+
+            ulong ulx = (ulong)((x / 8d) + 2147483648d);
             Console.WriteLine(ulx);
-            ulong uly = (ulong)((y / 4096d) + 2147483648d);
+            ulong uly = (ulong)((y / 8d) + 2147483648d);
             Console.WriteLine(uly);
             ulong i = (4294967296UL * uly) + ulx;
             Console.WriteLine(i);
