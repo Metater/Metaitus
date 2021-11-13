@@ -9,6 +9,9 @@ namespace MetaitusTesting
     {
         static void Main(string[] args)
         {
+            MZone zone = new MZone();
+            zone.TryGetGrid(17592186044415d, 17592186044415d, out _);
+            /*
             WorldListener worldListener = new WorldListener();
             World world = new World(worldListener, 10);
 
@@ -29,6 +32,7 @@ namespace MetaitusTesting
                 world.Update(deltaTime);
                 Thread.Sleep(1);
             }
+            */
 
             // For circles colliding, radius^2+radius^2 >= distance^2 between circles
         }

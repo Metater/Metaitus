@@ -28,8 +28,8 @@ namespace Metaitus
             for (int i = 0; i < 4; i++)
             {
                 MBox cornerBox = box.GetCorner(i);
-                if (cornerBox.PointInside(x, y))
-                    corner = MQuadtree(cornerBox, this);
+                //if (cornerBox.PointInside(x, y))
+                    //corner = MQuadtree(cornerBox, this);
             }
             return corner;
         }

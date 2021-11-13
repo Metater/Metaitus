@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace Metaitus
 {
     public class MZone
@@ -48,6 +51,17 @@ namespace Metaitus
 
         // recursively despawn and spawn entities
 
-        MQuadtree tree = new MQuadtree(new MBox(0, 0, 4294967295, 4294967295));
+        public Dictionary<ulong, MGrid16x16> rootGrid = new Dictionary<ulong, MGrid16x16>();
+
+        public bool TryGetGrid(double x, double y, out MGrid16x16 grid)
+        {
+            ulong ulx = (ulong)((x / 4096d) + 2147483648d);
+            Console.WriteLine(ulx);
+            ulong uly = (ulong)((y / 4096d) + 2147483648d);
+            Console.WriteLine(uly);
+            ulong i = (4294967296UL * uly) + ulx;
+            Console.WriteLine(i);
+            return rootGrid.TryGetValue(i, out grid);
+        }
     }
 }
