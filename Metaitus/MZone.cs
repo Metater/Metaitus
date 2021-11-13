@@ -1,3 +1,4 @@
+using Metaitus.Types;
 using System;
 using System.Collections.Generic;
 
@@ -51,20 +52,81 @@ namespace Metaitus
 
         // recursively despawn and spawn entities
 
-        public Dictionary<ulong, MGrid16x16> rootGrid = new Dictionary<ulong, MGrid16x16>();
+        // think about how to implement sleeping entities, have a supplier for them?
 
-        public bool TryGetGrid(double x, double y, out MGrid16x16 grid)
+        // point raycasts in select cells, for clicking on entities
+
+        public readonly Dictionary<ulong, MCell> grid = new Dictionary<ulong, MCell>();
+
+        private ulong nextId = 0;
+        private ulong NextId => nextId++;
+
+        public MCell EnsureCell(MVec2D pos)
         {
-            if (x < -17179869184d || x > 17179869183d) throw new ArgumentException("X out of bounds!");
-            if (y < -17179869184d || y > 17179869183d) throw new ArgumentException("Y out of bounds!");
+            ulong index = GetCoordsIndex(pos);
+            if (!grid.TryGetValue(index, out MCell cell))
+            {
+                cell = new MCell(index);
+                grid.Add(index, cell);
+            }
+            return cell;
+        }
 
-            ulong ulx = (ulong)((x / 8d) + 2147483648d);
-            Console.WriteLine(ulx);
-            ulong uly = (ulong)((y / 8d) + 2147483648d);
-            Console.WriteLine(uly);
-            ulong i = (4294967296UL * uly) + ulx;
-            Console.WriteLine(i);
-            return rootGrid.TryGetValue(i, out grid);
+        public bool RemoveCell(ulong index)
+        {
+            return grid.Remove(index);
+        }
+
+        public void GetCellAndSurrounding(MVec2D pos, List<MCell> cells)
+        {
+            // Doesn't account for overflows!
+            MVec2UL coords = GetIntCoords(pos);
+            ulong ulx = coords.x;
+            ulong uly = coords.y;
+            if (TryGetCell(new MVec2UL(ulx, uly), out MCell cell)) cells.Add(cell);
+            if (TryGetCell(new MVec2UL(ulx - 1, uly + 1), out cell)) cells.Add(cell);
+            if (TryGetCell(new MVec2UL(ulx, uly + 1), out cell)) cells.Add(cell);
+            if (TryGetCell(new MVec2UL(ulx + 1, uly + 1), out cell)) cells.Add(cell);
+            if (TryGetCell(new MVec2UL(ulx + 1, uly), out cell)) cells.Add(cell);
+            if (TryGetCell(new MVec2UL(ulx + 1, uly - 1), out cell)) cells.Add(cell);
+            if (TryGetCell(new MVec2UL(ulx, uly - 1), out cell)) cells.Add(cell);
+            if (TryGetCell(new MVec2UL(ulx - 1, uly - 1), out cell)) cells.Add(cell);
+            if (TryGetCell(new MVec2UL(ulx - 1, uly), out cell)) cells.Add(cell);
+        }
+
+        public bool TryGetCell(MVec2UL pos, out MCell cell)
+        {
+            return grid.TryGetValue(GetIndex(pos), out cell);
+        }
+
+        public static ulong GetCoordsIndex(MVec2D pos)
+        {
+            return GetIndex(GetIntCoords(pos));
+        }
+
+        public static MVec2UL GetIntCoords(MVec2D pos)
+        {
+            return new MVec2UL((ulong)((pos.x / 8d) + 2147483648d), (ulong)((pos.y / 8d) + 2147483648d));
+        }
+
+        public static ulong GetIndex(MVec2UL pos)
+        {
+            return (4294967296UL * pos.y) + pos.x;
+        }
+
+        public static MVec2D GetCenter(ulong index)
+        {
+            ulong ulx = index % 4294967296UL;
+            ulong uly = index / 4294967296UL;
+
+            double x = ((ulx - 2147483648d) * 8) + 4;
+            double y = ((uly - 2147483648d) * 8) + 4;
+            return new MVec2D(x, y);
+        }
+
+        private void CheckBounds(double b)
+        {
+            if (b < -17179869184d || b > 17179869183d) throw new Exception("Out of bounds!");
         }
     }
 }

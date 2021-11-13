@@ -2,10 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Metaitus
+namespace Metaitus.Physics
 {
-    public class MGrid16x16
+    public struct MRaycast
     {
-
     }
 }

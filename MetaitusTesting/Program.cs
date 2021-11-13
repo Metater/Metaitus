@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Threading;
 using Metaitus;
+using Metaitus.Types;
 
 namespace MetaitusTesting
 {
@@ -9,8 +10,11 @@ namespace MetaitusTesting
     {
         static void Main(string[] args)
         {
-            MZone zone = new MZone();
-            zone.TryGetGrid(17179869183d, 17179869183d, out _);
+            Console.WriteLine(MZone.GetIntCoords(new MVec2D(17179869183d, 17179869183d)));
+            ulong i = MZone.GetCoordsIndex(new MVec2D(0, 0));
+            Console.WriteLine(i);
+            Console.WriteLine(MZone.GetCenter(i));
+
             /*
             WorldListener worldListener = new WorldListener();
             World world = new World(worldListener, 10);
