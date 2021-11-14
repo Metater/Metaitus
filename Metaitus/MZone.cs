@@ -1,3 +1,4 @@
+using Metaitus.Physics;
 using Metaitus.Types;
 using System;
 using System.Collections.Generic;
@@ -56,10 +57,18 @@ namespace Metaitus
 
         // point raycasts in select cells, for clicking on entities
 
-        public readonly Dictionary<ulong, MCell> grid = new Dictionary<ulong, MCell>();
+        // add time scale
+
+        private readonly Dictionary<ulong, MCell> grid = new Dictionary<ulong, MCell>();
 
         private ulong nextId = 0;
-        private ulong NextId => nextId++;
+        public ulong NextId => nextId++;
+
+        public MEntity SpawnEntity(MVec2D position, MVec2D velocity, MAABBCollider[] colliders, MAABBCollider[] aabbTriggers, MCircleCollider[] circleTriggers, float drag = 0)
+        {
+            MEntity entity = new MEntity(this, position, velocity, NextId, colliders, aabbTriggers, circleTriggers, drag);
+            return entity;
+        }
 
         public MCell EnsureCell(MVec2D pos)
         {

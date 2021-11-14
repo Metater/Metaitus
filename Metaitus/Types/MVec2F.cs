@@ -31,6 +31,11 @@ namespace Metaitus.Types
             return new MVec2F(a.x / b.x, a.y / b.y);
         }
 
+        public static MVec2F operator *(MVec2F a, float b)
+        {
+            return new MVec2F(a.x * b, a.y * b);
+        }
+
         public override string ToString()
         {
             return $"({x}, {y})";

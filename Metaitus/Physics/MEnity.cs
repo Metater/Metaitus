@@ -1,5 +1,6 @@
 using Metaitus.Interfaces;
 using Metaitus.Types;
+using System;
 using System.Collections.Generic;
 
 namespace Metaitus.Physics
@@ -16,11 +17,19 @@ namespace Metaitus.Physics
         public readonly MAABBCollider[] aabbTriggers;
         public readonly MCircleCollider[] circleTriggers;
 
+        public float drag;
+
         public MCell Cell { get; private set; }
 
         private readonly List<MCell> pairs = new List<MCell>();
 
-        public MEntity(MZone zone, MVec2D position, MVec2D velocity, ulong id, MAABBCollider[] colliders, MAABBCollider[] aabbTriggers, MCircleCollider[] circleTriggers)
+        // later support static entities, they cant move, colliders still maybe?
+
+        // later do optimizations with doing EnsureCell checks, keep track of distance from center of cell and know
+        // what timesteps with no extra speed increases make it impossible to leave
+        // ^^^^ maybe not too expensive the way it is?
+
+        public MEntity(MZone zone, MVec2D position, MVec2D velocity, ulong id, MAABBCollider[] colliders, MAABBCollider[] aabbTriggers, MCircleCollider[] circleTriggers, float drag = 0)
         {
             this.zone = zone;
             this.position = position;
@@ -29,13 +38,31 @@ namespace Metaitus.Physics
             this.colliders = colliders;
             this.aabbTriggers = aabbTriggers;
             this.circleTriggers = circleTriggers;
+            this.drag = drag;
             Cell = zone.EnsureCell(position);
         }
 
         public void Tick(float timestep)
         {
-            Move(timestep);
-            Cell = zone.EnsureCell(position);
+            if (!(Math.Abs(velocity.x) < 0.125d && Math.Abs(velocity.y) < 0.125d))
+            {
+                if (Move(timestep))
+                {
+                    MCell last = Cell;
+                    Cell = zone.EnsureCell(position);
+                    // Need a runtime static loading system later
+                    //if (last != Cell && last.entities.Count == 0)
+                        //zone.RemoveCell(last.index);
+                }
+                if (drag != 0) velocity *= 1 - (timestep * drag);
+            }
+            else
+                velocity = MVec2D.zero;
+        }
+
+        public void AddForce(MVec2D force)
+        {
+            velocity += force;
         }
 
         private bool Move(float timestep)
