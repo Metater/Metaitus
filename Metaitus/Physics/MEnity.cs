@@ -29,6 +29,27 @@ namespace Metaitus.Physics
         // what timesteps with no extra speed increases make it impossible to leave
         // ^^^^ maybe not too expensive the way it is?
 
+
+        // add a inverse bounding box to the actual entity, it is checked every tick
+        // ^ have option
+
+        // actually move entity between cells in the cell list
+
+        // make player controller use forces, only way to not interfere with other forces
+
+        // inverse camera movement, player is still everything else moves
+
+        // better area for static cells there will be many just 1x1 cells you cant walk through
+
+        // think about how client dll will work, new version of metatius needed?
+
+        // make special "scenes" of collision that are loaded, then run a few checks then get deleted
+        // ^^^^ for physics rollback
+
+        // increase cell size if needed
+
+        // figure out how to center objects, is the offsetting done correctly?
+
         public MEntity(MZone zone, MVec2D position, MVec2D velocity, ulong id, MAABBCollider[] colliders, MAABBCollider[] aabbTriggers, MCircleCollider[] circleTriggers, float drag = 0)
         {
             this.zone = zone;
