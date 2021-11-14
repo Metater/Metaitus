@@ -50,6 +50,9 @@ namespace Metaitus.Physics
 
         // figure out how to center objects, is the offsetting done correctly?
 
+        // make different types of entites with inheritance,
+        // give entity references to colliders?
+
         public MEntity(MZone zone, MVec2D position, MVec2D velocity, ulong id, MAABBCollider[] colliders, MAABBCollider[] aabbTriggers, MCircleCollider[] circleTriggers, float drag = 0)
         {
             this.zone = zone;
