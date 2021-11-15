@@ -33,8 +33,6 @@ namespace Metaitus.Physics
         // add a inverse bounding box to the actual entity, it is checked every tick
         // ^ have option
 
-        // actually move entity between cells in the cell list
-
         // make player controller use forces, only way to not interfere with other forces
 
         // inverse camera movement, player is still everything else moves
@@ -68,20 +66,29 @@ namespace Metaitus.Physics
 
         public void Tick(float timestep)
         {
-            if (!(Math.Abs(velocity.x) < 0.125d && Math.Abs(velocity.y) < 0.125d))
+            if (Math.Abs(velocity.x) < 0.125d && Math.Abs(velocity.y) < 0.125d)
+            {
+                velocity = MVec2D.zero;
+            }
+            else
             {
                 if (Move(timestep))
                 {
                     MCell last = Cell;
                     Cell = zone.EnsureCell(position);
                     // Need a runtime static loading system later
-                    //if (last != Cell && last.entities.Count == 0)
-                        //zone.RemoveCell(last.index);
+                    if (last != Cell)
+                    {
+                        last.entities.Remove(this);
+                        Cell.entities.Add(this);
+                        if (last.entities.Count == 0)
+                        {
+                            //zone.RemoveCell(last.index);
+                        }
+                    }
                 }
                 if (drag != 0) velocity *= 1 - (timestep * drag);
             }
-            else
-                velocity = MVec2D.zero;
         }
 
         public void AddForce(MVec2D force)
