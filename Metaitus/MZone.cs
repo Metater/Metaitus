@@ -59,10 +59,22 @@ namespace Metaitus
 
         // add time scale
 
+        // hold off on aabb triggers, do circle triggers
+
+        public readonly uint cellSize;
+        // Not accounding for cellSize plus max
+        public double MaxPosDimension => (2147483648d * cellSize) - 1d;
+        public double MaxNegDimension => -2147483648d * cellSize;
+        public ulong NextId => nextId++;
+
         private readonly Dictionary<ulong, MCell> grid = new Dictionary<ulong, MCell>();
 
         private ulong nextId = 0;
-        public ulong NextId => nextId++;
+
+        public MZone(uint cellSize)
+        {
+            this.cellSize = cellSize;
+        }
 
         public MEntity SpawnEntity(MVec2D position, MVec2D velocity, MAABBCollider[] colliders, MAABBCollider[] aabbTriggers, MCircleCollider[] circleTriggers, float drag = 0)
         {
