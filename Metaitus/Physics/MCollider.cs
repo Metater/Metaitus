@@ -6,15 +6,15 @@ using System.Text;
 
 namespace Metaitus.Physics
 {
-    public class MCollider
+    public abstract class MCollider
+    {
+        
+    }
+    public class MDynamicCollider : MCollider
     {
 
     }
-    public class MDynamicCollider
-    {
-
-    }
-    public class MStaticCollider
+    public class MStaticCollider : MCollider
     {
         
     }
