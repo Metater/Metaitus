@@ -22,6 +22,7 @@ namespace Metaitus.Physics
         public MCell Cell { get; private set; }
 
         private readonly List<MCell> pairs = new List<MCell>();
+        private readonly List<MAABBCollider> collided = new List<MAABBCollider>();
 
         // later support static entities, they cant move, colliders still maybe?
 
@@ -133,6 +134,25 @@ namespace Metaitus.Physics
         public static bool IsCollidingWithStatic(MEntity a, MStaticCollider b, bool sendTouched = false)
         {
             bool collided = false;
+            foreach (MAABBCollider collider in a.colliders)
+            {
+                if (collided && collider.CollisionHandler == null) continue;
+                MVec2F staticPos = ((MVec2F)(b.position - a.position)) - collider.offset;
+                MVec2F staticMin = b.collider.min + staticPos;
+                MVec2F staticMax = b.collider.max + staticPos;
+                if (collider.max.x < staticMin.x || collider.min.x > staticMax.x) continue;
+                if (collider.max.y < staticMin.y || collider.min.y > staticMax.y) continue;
+                collided = true;
+                if (sendTouched) collider.CollisionHandler?.Touched(collider, b.collider);
+            }
+            return collided;
+        }
+
+        public bool IsCollidingWithStatic(MStaticCollider b, bool useEntityColliders = true, bool sendTouched = false)
+        {
+            bool collided = false;
+            // combine option useEntityColliders and sendTouched, opposites
+            // switch between a.colliders and collided, to save on checks
             foreach (MAABBCollider collider in a.colliders)
             {
                 if (collided && collider.CollisionHandler == null) continue;
