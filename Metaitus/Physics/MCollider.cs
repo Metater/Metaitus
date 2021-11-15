@@ -6,6 +6,18 @@ using System.Text;
 
 namespace Metaitus.Physics
 {
+    public class MCollider
+    {
+
+    }
+    public class MDynamicCollider
+    {
+
+    }
+    public class MStaticCollider
+    {
+        
+    }
     public abstract class MCollider
     {
         public MVec2F offset = MVec2F.zero;
