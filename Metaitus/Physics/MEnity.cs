@@ -15,7 +15,8 @@ namespace Metaitus.Physics
         public MVec2D Position { get; private set; }
         public MVec2D Velocity { get; private set; }
 
-        public readonly MCollider[] colliders;
+        public readonly List<MCollider> colliders;
+        public readonly List<MTrigger> triggers;
 
         public float drag;
 
@@ -56,14 +57,15 @@ namespace Metaitus.Physics
 
         // bounding boxes, to see if a more complex object can collide with anything
 
-        public MEntity(MZone zone, ulong id, MVec2D position, MVec2D velocity, MCollider[] colliders, float drag = 0)
+        public MEntity(MZone zone, ulong id, MVec2D position, MVec2D velocity, List<MCollider> colliders, List<MTrigger> triggers, float drag = 0)
         {
             this.zone = zone;
             this.id = id;
             Position = position;
             Velocity = velocity;
             this.colliders = colliders;
-            biaxialCollisions = new List<MCollider>(colliders.Length);
+            biaxialCollisions = new List<MCollider>(colliders.Count);
+            this.triggers = triggers;
             this.drag = drag;
             Cell = zone.EnsureCell(position);
             Cell.entities.Add(this);
@@ -116,11 +118,11 @@ namespace Metaitus.Physics
                     {
                         Position = lastPos;
                         Position += Velocity * new MVec2D(0, timestep);
-                        if (IsColliding(staticCollider))
+                        if (IsColliding(staticCollider, false))
                         {
                             Position = lastPos;
                             Position += Velocity * new MVec2D(timestep, 0);
-                            if (IsColliding(staticCollider))
+                            if (IsColliding(staticCollider, false))
                             {
                                 Position = lastPos;
                                 Velocity = MVec2D.zero;
@@ -135,7 +137,7 @@ namespace Metaitus.Physics
             return moved;
         }
 
-        public bool IsColliding(MCollider staticCollider, bool biaxial = false)
+        public bool IsColliding(MCollider staticCollider, bool biaxial)
         {
             bool collided = false;
             if (biaxial)
@@ -155,11 +157,10 @@ namespace Metaitus.Physics
             {
                 foreach (MCollider collider in biaxialCollisions)
                 {
-                    if (collided && !collider.HasCollisionHandlers) continue;
                     if (collider.Intersects(Position, staticCollider))
                     {
                         collided = true;
-                        if (collider.HasCollisionHandlers) collider.Touched(staticCollider);
+                        break;
                     }
                 }
             }

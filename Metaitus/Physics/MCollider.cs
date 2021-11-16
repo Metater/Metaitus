@@ -8,7 +8,7 @@ namespace Metaitus.Physics
 {
     public class MCollider
     {
-        public readonly bool isStatic;
+        public bool IsStatic { get; protected set; }
         public MVec2F Min { get; protected set; }
         public MVec2F Max { get; protected set; }
         public MVec2F Offset { get; protected set; }
@@ -19,19 +19,19 @@ namespace Metaitus.Physics
 
         public MCollider(MVec2F min, MVec2F max, MVec2F offset)
         {
-            isStatic = false;
+            IsStatic = false;
             Min = min;
             Max = max;
             Offset = offset;
         }
 
-        public MCollider(MVec2F min, MVec2F max, MVec2D position, MVec2F offset)
+        public MCollider(MVec2F min, MVec2F max, MVec2F offset, MVec2D position)
         {
-            isStatic = true;
+            IsStatic = true;
             Min = min;
             Max = max;
-            Position = position;
             Offset = offset;
+            Position = position;
         }
 
         public void AddCollisionHandler(ICollisionHandler collisionHandler)
@@ -46,13 +46,27 @@ namespace Metaitus.Physics
 
         public bool Intersects(MVec2D position, MCollider other)
         {
-            if (isStatic) return false;
             MVec2F otherPos = ((MVec2F)(other.Position - position)) - Offset + other.Offset;
             MVec2F otherMin = other.Min + otherPos;
             MVec2F otherMax = other.Max + otherPos;
             if (Max.x < otherMin.x || Min.x > otherMax.x) return false;
             if (Max.y < otherMin.y || Min.y > otherMax.y) return false;
             return true;
+        }
+
+        public bool ContainsPoint(MVec2D point)
+        {
+            return ContainsPoint(Position, point);
+        }
+
+        public bool ContainsPoint(MVec2D position, MVec2D point)
+        {
+            MVec2F pointPos = ((MVec2F)(point - position)) - Offset;
+            float left = Min.x;
+            float right = left + Max.x;
+            float bottom = Min.y;
+            float top = bottom + Max.y;
+            return left <= pointPos.x && bottom <= pointPos.y && pointPos.x <= right && pointPos.y <= top;
         }
 
         public void Touched(MCollider toucher)

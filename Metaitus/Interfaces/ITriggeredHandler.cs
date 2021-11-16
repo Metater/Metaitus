@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Metaitus.Interfaces
 {
-    public interface ITriggerHandler
+    public interface ITriggeredHandler
     {
         void Triggered(MTrigger triggered, MTrigger triggerer);
     }
