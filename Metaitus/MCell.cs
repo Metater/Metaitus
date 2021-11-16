@@ -10,7 +10,7 @@ namespace Metaitus
     {
         public readonly ulong index;
         public readonly List<MEntity> entities = new List<MEntity>();
-        public readonly List<MStaticCollider> staticColliders = new List<MStaticCollider>();
+        public readonly List<MCollider> staticColliders = new List<MCollider>();
 
         public MCell(ulong index)
         {

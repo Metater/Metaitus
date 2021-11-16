@@ -1,6 +1,7 @@
 using Metaitus.Interfaces;
 using Metaitus.Types;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Metaitus.Physics
@@ -9,20 +10,19 @@ namespace Metaitus.Physics
     {
         private readonly MZone zone;
 
-        public MVec2D position;
-        public MVec2D velocity;
-
         public readonly ulong id;
-        public readonly MAABBCollider[] colliders;
-        public readonly MAABBCollider[] aabbTriggers;
-        public readonly MCircleCollider[] circleTriggers;
+
+        public MVec2D Position { get; private set; }
+        public MVec2D Velocity { get; private set; }
+
+        public readonly MCollider[] colliders;
 
         public float drag;
 
         public MCell Cell { get; private set; }
 
-        private readonly List<MCell> pairs = new List<MCell>();
-        private readonly List<MAABBCollider> collided = new List<MAABBCollider>();
+        private readonly List<MCell> cells = new List<MCell>(9);
+        private readonly List<MCollider> biaxialCollisions;
 
         // later support static entities, they cant move, colliders still maybe?
 
@@ -52,31 +52,35 @@ namespace Metaitus.Physics
         // make different types of entites with inheritance,
         // give entity references to colliders?
 
-        public MEntity(MZone zone, MVec2D position, MVec2D velocity, ulong id, MAABBCollider[] colliders, MAABBCollider[] aabbTriggers, MCircleCollider[] circleTriggers, float drag = 0)
+        // add always applicable colliders, use inverse aabbs
+
+        // bounding boxes, to see if a more complex object can collide with anything
+
+        public MEntity(MZone zone, ulong id, MVec2D position, MVec2D velocity, MCollider[] colliders, float drag = 0)
         {
             this.zone = zone;
-            this.position = position;
-            this.velocity = velocity;
             this.id = id;
+            Position = position;
+            Velocity = velocity;
             this.colliders = colliders;
-            this.aabbTriggers = aabbTriggers;
-            this.circleTriggers = circleTriggers;
+            biaxialCollisions = new List<MCollider>(colliders.Length);
             this.drag = drag;
             Cell = zone.EnsureCell(position);
+            Cell.entities.Add(this);
         }
 
         public void Tick(float timestep)
         {
-            if (Math.Abs(velocity.x) < 0.125d && Math.Abs(velocity.y) < 0.125d)
+            if (Math.Abs(Velocity.x) < 0.125d && Math.Abs(Velocity.y) < 0.125d)
             {
-                velocity = MVec2D.zero;
+                Velocity = MVec2D.zero;
             }
             else
             {
                 if (Move(timestep))
                 {
                     MCell last = Cell;
-                    Cell = zone.EnsureCell(position);
+                    Cell = zone.EnsureCell(Position);
                     // Need a runtime static loading system later
                     if (last != Cell)
                     {
@@ -88,81 +92,76 @@ namespace Metaitus.Physics
                         }
                     }
                 }
-                if (drag != 0) velocity *= 1 - (timestep * drag);
+                if (drag != 0) Velocity *= 1 - (timestep * drag);
             }
         }
 
         public void AddForce(MVec2D force)
         {
-            velocity += force;
+            Velocity += force;
         }
 
         private bool Move(float timestep)
         {
             bool moved = true;
-            MVec2D lastPos = position;
-            position += velocity * new MVec2D(timestep, timestep);
-            zone.GetCellAndSurrounding(position, pairs);
-            foreach (MCell cell in pairs)
+            MVec2D lastPos = Position;
+            Position += Velocity * timestep;
+            cells.Clear();
+            zone.GetCellAndSurrounding(Position, cells);
+            foreach (MCell cell in cells)
             {
-                foreach (MStaticCollider staticCollider in cell.staticColliders)
+                foreach (MCollider staticCollider in cell.staticColliders)
                 {
-                    if (IsCollidingWithStatic(this, staticCollider, true))
+                    if (IsColliding(staticCollider, true))
                     {
-                        position = lastPos;
-                        position += velocity * new MVec2D(0, timestep);
-                        if (IsCollidingWithStatic(this, staticCollider))
+                        Position = lastPos;
+                        Position += Velocity * new MVec2D(0, timestep);
+                        if (IsColliding(staticCollider))
                         {
-                            position = lastPos;
-                            position += velocity * new MVec2D(timestep, 0);
-                            if (IsCollidingWithStatic(this, staticCollider))
+                            Position = lastPos;
+                            Position += Velocity * new MVec2D(timestep, 0);
+                            if (IsColliding(staticCollider))
                             {
-                                position = lastPos;
-                                velocity = MVec2D.zero;
+                                Position = lastPos;
+                                Velocity = MVec2D.zero;
                                 moved = false;
                             }
-                            else velocity *= new MVec2D(1, 0);
+                            else Velocity *= new MVec2D(1, 0);
                         }
-                        else velocity *= new MVec2D(0, 1);
+                        else Velocity *= new MVec2D(0, 1);
                     }
                 }
             }
-            pairs.Clear();
             return moved;
         }
 
-        public static bool IsCollidingWithStatic(MEntity a, MStaticCollider b, bool sendTouched = false)
+        public bool IsColliding(MCollider staticCollider, bool biaxial = false)
         {
             bool collided = false;
-            foreach (MAABBCollider collider in a.colliders)
+            if (biaxial)
             {
-                if (collided && collider.CollisionHandler == null) continue;
-                MVec2F staticPos = ((MVec2F)(b.position - a.position)) - collider.offset;
-                MVec2F staticMin = b.collider.min + staticPos;
-                MVec2F staticMax = b.collider.max + staticPos;
-                if (collider.max.x < staticMin.x || collider.min.x > staticMax.x) continue;
-                if (collider.max.y < staticMin.y || collider.min.y > staticMax.y) continue;
-                collided = true;
-                if (sendTouched) collider.CollisionHandler?.Touched(collider, b.collider);
+                biaxialCollisions.Clear();
+                foreach (MCollider collider in colliders)
+                {
+                    if (collider.Intersects(Position, staticCollider))
+                    {
+                        collided = true;
+                        if (collider.HasCollisionHandlers) collider.Touched(staticCollider);
+                        biaxialCollisions.Add(collider);
+                    }
+                }
             }
-            return collided;
-        }
-
-        public bool IsCollidingWithStatic(MStaticCollider b, bool useEntityColliders = true, bool sendTouched = false)
-        {
-            bool collided = false;
-            // combine option useEntityColliders and sendTouched, opposites
-            // switch between a.colliders and collided, to save on checks
-            foreach (MAABBCollider collider in a.colliders)
+            else
             {
-                if (collided && collider.CollisionHandler == null) continue;
-                MVec2F staticPos = ((MVec2F)(b.position - a.position)) - collider.offset;
-                MVec2F staticMin = b.collider.min + staticPos;
-                MVec2F staticMax = b.collider.max + staticPos;
-                if (collider.max.x < staticMin.x || collider.min.x > staticMax.x) continue;
-                if (collider.max.y < staticMin.y || collider.min.y > staticMax.y) continue;
-                collided = true;
-                if (sendTouched) collider.CollisionHandler?.Touched(collider, b.collider);
+                foreach (MCollider collider in biaxialCollisions)
+                {
+                    if (collided && !collider.HasCollisionHandlers) continue;
+                    if (collider.Intersects(Position, staticCollider))
+                    {
+                        collided = true;
+                        if (collider.HasCollisionHandlers) collider.Touched(staticCollider);
+                    }
+                }
             }
             return collided;
         }

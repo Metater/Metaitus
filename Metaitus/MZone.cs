@@ -76,11 +76,13 @@ namespace Metaitus
             this.cellSize = cellSize;
         }
 
+        /*
         public MEntity SpawnEntity(MVec2D position, MVec2D velocity, MAABBCollider[] colliders, MAABBCollider[] aabbTriggers, MCircleCollider[] circleTriggers, float drag = 0)
         {
             MEntity entity = new MEntity(this, position, velocity, NextId, colliders, aabbTriggers, circleTriggers, drag);
             return entity;
         }
+        */
 
         public MCell EnsureCell(MVec2D pos)
         {

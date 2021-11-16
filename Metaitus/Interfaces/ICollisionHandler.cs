@@ -7,7 +7,6 @@ namespace Metaitus.Interfaces
 {
     public interface ICollisionHandler
     {
-        void Touched(MAABBCollider touched, MAABBCollider toucher);
-        void Triggered(MCollider triggered, MCollider triggerer);
+        void Touched(MCollider touched, MCollider toucher);
     }
 }
