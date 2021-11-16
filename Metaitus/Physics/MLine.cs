@@ -1,4 +1,6 @@
-public namespace Metaitus.Physics
+using Metaitus.Types;
+
+namespace Metaitus.Physics
 {
     public struct MLine
     {
