@@ -73,7 +73,9 @@ namespace Metaitus.Physics
 
         public void Tick(float timestep)
         {
-            if (Math.Abs(Velocity.x) < 0.125d && Math.Abs(Velocity.y) < 0.125d)
+            // do trigger checks
+            if (Velocity.x == 0 && Velocity.y == 0) return;
+            if (Math.Abs(Velocity.x) < 0.0625d && Math.Abs(Velocity.y) < 0.0625d)
             {
                 Velocity = MVec2D.zero;
             }

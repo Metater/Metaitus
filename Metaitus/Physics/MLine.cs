@@ -21,19 +21,14 @@ namespace Metaitus.Physics
             var r = b - a;
             var s = other.b - other.a;
             var rxs = r.Cross(s);
+            if (rxs.IsZero()) return false;
+
             var v = (other.a - a);
             var qpxr = v.Cross(r);
-
-            var rxsZ = rxs.IsZero();
-
-            if (rxsZ)
-                return false;
-
             var t = v.Cross(s) / rxs;
-
             var u = qpxr / rxs;
 
-            if (!rxsZ && (0 <= t && t <= 1) && (0 <= u && u <= 1))
+            if ((0 <= t && t <= 1) && (0 <= u && u <= 1))
             {
                 intersection = a + (t * r);
                 return true;

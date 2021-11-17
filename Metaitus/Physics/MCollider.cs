@@ -54,7 +54,46 @@ namespace Metaitus.Physics
             return true;
         }
 
-        public bool Intersects()
+        public bool Intersects(MLine other, out List<MVec2F> intersections)
+        {
+            intersections = new List<MVec2F>();
+
+            MVec2F offsetMin = Min + Offset;
+            MVec2F offsetMax = Max + Offset;
+
+            float left = offsetMin.x;
+            float right = left + offsetMax.x;
+            float bottom = offsetMin.y;
+            float top = bottom + offsetMax.y;
+
+            MLine l = new MLine(new MVec2F(left, bottom), new MVec2F(left, top));
+            MLine r = new MLine(new MVec2F(right, bottom), new MVec2F(right, top));
+            MLine b = new MLine(new MVec2F(left, bottom), new MVec2F(right, bottom));
+            MLine t = new MLine(new MVec2F(left, top), new MVec2F(right, top));
+
+            bool intersects = false;
+            if (l.Intersects(other, out MVec2F intersection))
+            {
+                intersects = true;
+                intersections.Add(intersection);
+            }
+            if (r.Intersects(other, out intersection))
+            {
+                intersects = true;
+                intersections.Add(intersection);
+            }
+            if (b.Intersects(other, out intersection))
+            {
+                intersects = true;
+                intersections.Add(intersection);
+            }
+            if (t.Intersects(other, out intersection))
+            {
+                intersects = true;
+                intersections.Add(intersection);
+            }
+            return intersects;
+        }
 
         public bool ContainsPoint(MVec2D point)
         {

@@ -61,7 +61,7 @@ namespace Metaitus
 
         // hold off on aabb triggers, do circle triggers
 
-        public readonly uint cellSize;
+        public readonly double cellSize;
         // Not accounding for cellSize plus max
         public double MaxPosDimension => (2147483648d * cellSize) - 1d;
         public double MaxNegDimension => -2147483648d * cellSize;
@@ -71,7 +71,7 @@ namespace Metaitus
 
         private ulong nextId = 0;
 
-        public MZone(uint cellSize)
+        public MZone(double cellSize)
         {
             this.cellSize = cellSize;
         }
@@ -129,7 +129,7 @@ namespace Metaitus
 
         public static MVec2UL GetIntCoords(MVec2D pos)
         {
-            return new MVec2UL((ulong)((pos.x / 8d) + 2147483648d), (ulong)((pos.y / 8d) + 2147483648d));
+            return new MVec2UL((ulong)((pos.x / cellSize) + 2147483648d), (ulong)((pos.y / cellSize) + 2147483648d));
         }
 
         public static ulong GetIndex(MVec2UL pos)
@@ -142,14 +142,9 @@ namespace Metaitus
             ulong ulx = index % 4294967296UL;
             ulong uly = index / 4294967296UL;
 
-            double x = ((ulx - 2147483648d) * 8) + 4;
-            double y = ((uly - 2147483648d) * 8) + 4;
+            double x = ((ulx - 2147483648d) * cellSize) + (cellSize / 2);
+            double y = ((uly - 2147483648d) * cellSize) + (cellSize / 2);
             return new MVec2D(x, y);
-        }
-
-        private void CheckBounds(double b)
-        {
-            if (b < -17179869184d || b > 17179869183d) throw new Exception("Out of bounds!");
         }
     }
 }
