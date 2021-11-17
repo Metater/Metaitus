@@ -100,6 +100,7 @@ namespace Metaitus.Physics
             }
         }
 
+        // make another force that is added every tick and is scaled based on timestep?
         public void AddForce(MVec2D force)
         {
             Velocity += force;
