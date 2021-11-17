@@ -13,14 +13,33 @@ namespace Metaitus.Physics
             this.b = b;
         }
 
-        public static bool CCW(MVec2F a, MVec2F b, MVec2F c)
+        // https://www.codeproject.com/Tips/862988/Find-the-Intersection-Point-of-Two-Line-Segments
+        public bool Intersects(MLine other, out MVec2F intersection)
         {
-            return (c.y - a.y) * (b.x - a.x) > (b.y - a.y) * (c.x - a.x);
-        }
+            intersection = new MVec2F(float.NaN, float.NaN);
 
-        public bool Intersects(MLine other)
-        {
-            return (CCW(a, other.a, other.b) != CCW(b, other.a, other.b)) && (CCW(a, b, other.a) != CCW(a, b, other.b));
+            var r = b - a;
+            var s = other.b - other.a;
+            var rxs = r.Cross(s);
+            var v = (other.a - a);
+            var qpxr = v.Cross(r);
+
+            var rxsZ = rxs.IsZero();
+
+            if (rxsZ)
+                return false;
+
+            var t = v.Cross(s) / rxs;
+
+            var u = qpxr / rxs;
+
+            if (!rxsZ && (0 <= t && t <= 1) && (0 <= u && u <= 1))
+            {
+                intersection = a + (t * r);
+                return true;
+            }
+
+            return false;
         }
     }
 }

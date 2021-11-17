@@ -8,6 +8,8 @@ namespace Metaitus.Types
 
         public float x, y;
 
+        public float SqrMagnitude => (x * x) + (y * y);
+
         public MVec2F(float x, float y)
         {
             this.x = x;
@@ -34,6 +36,20 @@ namespace Metaitus.Types
         public static MVec2F operator *(MVec2F a, float b)
         {
             return new MVec2F(a.x * b, a.y * b);
+        }
+        public static MVec2F operator *(float a, MVec2F b)
+        {
+            return new MVec2F(b.x * a, b.y * a);
+        }
+
+        public float Dot(MVec2F v)
+        {
+            return (x * v.x) + (y * v.y);
+        }
+
+        public float Cross(MVec2F v)
+        {
+            return (x * v.y) - (y * v.x);
         }
 
         public override string ToString()

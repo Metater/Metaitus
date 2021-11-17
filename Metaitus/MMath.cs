@@ -1,4 +1,6 @@
-public namespace Metaitus
+using Metaitus.Types;
+
+namespace Metaitus
 {
     public static class MMath
     {

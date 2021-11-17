@@ -54,6 +54,8 @@ namespace Metaitus.Physics
             return true;
         }
 
+        public bool Intersects()
+
         public bool ContainsPoint(MVec2D point)
         {
             return ContainsPoint(Position, point);

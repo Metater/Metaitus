@@ -1,3 +1,7 @@
+using Metaitus.Interfaces;
+using Metaitus.Types;
+using System.Collections.Generic;
+
 public abstract class MTrigger
 {
     // Eventually add non-circle triggers
@@ -7,7 +11,7 @@ public abstract class MTrigger
     public float Radius { get; protected set; }
     public MVec2F Offset { get; protected set; }
     public MVec2D Position { get; protected set; }
-    public bool HasCollisionHandlers => collisionHandlers.Count != 0;
+    public bool HasTriggeredHandlers => triggeredHandlers.Count != 0;
 
     private readonly List<ITriggeredHandler> triggeredHandlers = new List<ITriggeredHandler>();
 
@@ -44,6 +48,6 @@ public abstract class MTrigger
 
     public void Triggered(MTrigger triggerer)
     {
-        triggeredHandlers.ForEach((h) => h.Touched(this, triggerer));
+        triggeredHandlers.ForEach((h) => h.Triggered(this, triggerer));
     }
 }
