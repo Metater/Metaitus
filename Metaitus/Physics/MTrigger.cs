@@ -1,4 +1,5 @@
 using Metaitus.Interfaces;
+using Metaitus.Physics;
 using Metaitus.Types;
 using System.Collections.Generic;
 
@@ -11,6 +12,11 @@ public abstract class MTrigger
     public float Radius { get; protected set; }
     public MVec2F Offset { get; protected set; }
     public MVec2D Position { get; protected set; }
+    public bool HasEntity => Entity != null;
+    public MEntity Entity { get; protected set; }
+
+    public readonly HashSet<string> tags = new HashSet<string>();
+
     public bool HasTriggeredHandlers => triggeredHandlers.Count != 0;
 
     private readonly List<ITriggeredHandler> triggeredHandlers = new List<ITriggeredHandler>();
@@ -28,6 +34,11 @@ public abstract class MTrigger
         Radius = radius;
         Offset = offset;
         Position = position;
+    }
+
+    public void SetEntity(MEntity entity)
+    {
+        Entity = entity;
     }
 
     public void AddTriggeredHandler(ITriggeredHandler triggeredHandler)

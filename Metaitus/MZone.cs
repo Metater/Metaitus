@@ -122,12 +122,12 @@ namespace Metaitus
             return grid.TryGetValue(GetIndex(pos), out cell);
         }
 
-        public static ulong GetCoordsIndex(MVec2D pos)
+        public ulong GetCoordsIndex(MVec2D pos)
         {
             return GetIndex(GetIntCoords(pos));
         }
 
-        public static MVec2UL GetIntCoords(MVec2D pos)
+        public MVec2UL GetIntCoords(MVec2D pos)
         {
             return new MVec2UL((ulong)((pos.x / cellSize) + 2147483648d), (ulong)((pos.y / cellSize) + 2147483648d));
         }
@@ -137,7 +137,7 @@ namespace Metaitus
             return (4294967296UL * pos.y) + pos.x;
         }
 
-        public static MVec2D GetCenter(ulong index)
+        public MVec2D GetCenter(ulong index)
         {
             ulong ulx = index % 4294967296UL;
             ulong uly = index / 4294967296UL;

@@ -20,6 +20,8 @@ namespace Metaitus.Physics
 
         public float drag;
 
+        public readonly HashSet<string> tags = new HashSet<string>();
+
         public MCell Cell { get; private set; }
 
         private readonly List<MCell> cells = new List<MCell>(9);
@@ -61,19 +63,38 @@ namespace Metaitus.Physics
         {
             this.zone = zone;
             this.id = id;
+
             Position = position;
             Velocity = velocity;
+
             this.colliders = colliders;
-            biaxialCollisions = new List<MCollider>(colliders.Count);
+            colliders?.ForEach((c) => c.SetEntity(this));
+            biaxialCollisions = new List<MCollider>(colliders == null ? 0 : colliders.Count);
+
             this.triggers = triggers;
+            triggers?.ForEach((c) => c.SetEntity(this));
+
             this.drag = drag;
+
             Cell = zone.EnsureCell(position);
             Cell.entities.Add(this);
         }
 
         public void Tick(float timestep)
         {
-            // do trigger checks
+            cells.Clear();
+            zone.GetCellAndSurrounding(Position, cells);
+
+            foreach (MCell cell in cells)
+            {
+                foreach (MEntity entity in cell.entities)
+                {
+                    if (entity == this) continue;
+                    foreach (MTrigger trigger in entity.triggers)
+                        CheckTriggers(trigger);
+                }
+            }
+
             if (Velocity.x == 0 && Velocity.y == 0) return;
             if (Math.Abs(Velocity.x) < 0.0625d && Math.Abs(Velocity.y) < 0.0625d)
             {
@@ -111,14 +132,33 @@ namespace Metaitus.Physics
             bool moved = true;
             MVec2D lastPos = Position;
             Position += Velocity * timestep;
-            cells.Clear();
-            zone.GetCellAndSurrounding(Position, cells);
+            MVec2D possiblePos = Position;
+
+            bool canMoveX = true;
+            bool canMoveY = true;
+
             foreach (MCell cell in cells)
             {
+                // This method of checking collisions may be recalculating things that can be inferred from things earlier
+                // If it cant move in any axis against one object, then it cant move at all right, bc its still there?
                 foreach (MCollider staticCollider in cell.staticColliders)
                 {
+                    if (IsColliding(possiblePos, staticCollider, true))
+                    {
+                        if (canMoveX || canMoveY)
+                        {
+                            
+                        }
+                    }
+
+
+
+
+
+
                     if (IsColliding(staticCollider, true))
                     {
+                        if (!moved) continue;
                         Position = lastPos;
                         Position += Velocity * new MVec2D(0, timestep);
                         if (IsColliding(staticCollider, false))
@@ -140,7 +180,17 @@ namespace Metaitus.Physics
             return moved;
         }
 
-        public bool IsColliding(MCollider staticCollider, bool biaxial)
+        public void CheckTriggers(MTrigger otherTrigger)
+        {
+            foreach (MTrigger trigger in triggers)
+            {
+                if (!trigger.HasTriggeredHandlers) continue;
+                if (trigger.Intersects(Position, otherTrigger))
+                    trigger.Triggered(otherTrigger);
+            }
+        }
+
+        public bool IsColliding(MVec2D position, MCollider staticCollider, bool biaxial)
         {
             bool collided = false;
             if (biaxial)
@@ -148,7 +198,7 @@ namespace Metaitus.Physics
                 biaxialCollisions.Clear();
                 foreach (MCollider collider in colliders)
                 {
-                    if (collider.Intersects(Position, staticCollider))
+                    if (collider.Intersects(position, staticCollider))
                     {
                         collided = true;
                         if (collider.HasCollisionHandlers) collider.Touched(staticCollider);
@@ -160,7 +210,7 @@ namespace Metaitus.Physics
             {
                 foreach (MCollider collider in biaxialCollisions)
                 {
-                    if (collider.Intersects(Position, staticCollider))
+                    if (collider.Intersects(position, staticCollider))
                     {
                         collided = true;
                         break;

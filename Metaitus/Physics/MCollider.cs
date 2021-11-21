@@ -13,6 +13,11 @@ namespace Metaitus.Physics
         public MVec2F Max { get; protected set; }
         public MVec2F Offset { get; protected set; }
         public MVec2D Position { get; protected set; }
+        public bool HasEntity => Entity != null;
+        public MEntity Entity { get; protected set; }
+
+        public readonly HashSet<string> tags = new HashSet<string>();
+
         public bool HasCollisionHandlers => collisionHandlers.Count != 0;
 
         private readonly List<ICollisionHandler> collisionHandlers = new List<ICollisionHandler>();
@@ -32,6 +37,11 @@ namespace Metaitus.Physics
             Max = max;
             Offset = offset;
             Position = position;
+        }
+
+        public void SetEntity(MEntity entity)
+        {
+            Entity = entity;
         }
 
         public void AddCollisionHandler(ICollisionHandler collisionHandler)
