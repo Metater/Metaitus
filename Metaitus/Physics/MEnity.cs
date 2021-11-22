@@ -131,52 +131,38 @@ namespace Metaitus.Physics
         {
             bool moved = true;
             MVec2D lastPos = Position;
-            Position += Velocity * timestep;
-            MVec2D possiblePos = Position;
+
+            MVec2D usualPos = Position + (Velocity * timestep);
+
+            MVec2D xDelta = new MVec2D(Velocity.x * timestep, 0);
+            MVec2D yDelta = new MVec2D(0, Velocity.x * timestep);
 
             bool canMoveX = true;
             bool canMoveY = true;
 
             foreach (MCell cell in cells)
             {
-                // This method of checking collisions may be recalculating things that can be inferred from things earlier
-                // If it cant move in any axis against one object, then it cant move at all right, bc its still there?
                 foreach (MCollider staticCollider in cell.staticColliders)
                 {
-                    if (IsColliding(possiblePos, staticCollider, true))
+                    if (IsColliding(usualPos, staticCollider, true))
                     {
-                        if (canMoveX || canMoveY)
+                        if (canMoveX)
                         {
-                            
+                            if (IsColliding(lastPos + xDelta, staticCollider, false))
+                                canMoveX = false;
                         }
-                    }
-
-
-
-
-
-
-                    if (IsColliding(staticCollider, true))
-                    {
-                        if (!moved) continue;
-                        Position = lastPos;
-                        Position += Velocity * new MVec2D(0, timestep);
-                        if (IsColliding(staticCollider, false))
+                        if (canMoveY)
                         {
-                            Position = lastPos;
-                            Position += Velocity * new MVec2D(timestep, 0);
-                            if (IsColliding(staticCollider, false))
-                            {
-                                Position = lastPos;
-                                Velocity = MVec2D.zero;
-                                moved = false;
-                            }
-                            else Velocity *= new MVec2D(1, 0);
+                            if (IsColliding(lastPos + yDelta, staticCollider, false))
+                                canMoveY = false;
                         }
-                        else Velocity *= new MVec2D(0, 1);
                     }
                 }
             }
+
+            if (canMoveX) Position += xDelta;
+            if (canMoveY) Position += yDelta;
+
             return moved;
         }
 
