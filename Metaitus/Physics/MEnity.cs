@@ -58,6 +58,7 @@ namespace Metaitus.Physics
         // add always applicable colliders, use inverse aabbs
 
         // bounding boxes, to see if a more complex object can collide with anything
+        // optimizations ^^
 
         public MEntity(MZone zone, ulong id, MVec2D position, MVec2D velocity, List<MCollider> colliders, List<MTrigger> triggers, float drag = 0)
         {
@@ -135,7 +136,7 @@ namespace Metaitus.Physics
             MVec2D usualPos = Position + (Velocity * timestep);
 
             MVec2D xDelta = new MVec2D(Velocity.x * timestep, 0);
-            MVec2D yDelta = new MVec2D(0, Velocity.x * timestep);
+            MVec2D yDelta = new MVec2D(0, Velocity.y * timestep);
 
             bool canMoveX = true;
             bool canMoveY = true;
@@ -161,7 +162,9 @@ namespace Metaitus.Physics
             }
 
             if (canMoveX) Position += xDelta;
+            else Velocity *= new MVec2D(0, 1);
             if (canMoveY) Position += yDelta;
+            else Velocity *= new MVec2D(1, 0);
 
             return moved;
         }
