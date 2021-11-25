@@ -1,5 +1,5 @@
 using Metaitus.Physics;
-using Metaitus.Types;
+using MetaitusShared.Types;
 using System;
 using System.Collections.Generic;
 
@@ -45,12 +45,6 @@ namespace Metaitus
         // cg point ccd, center of gravity point continuous collision detection, used for fast moving bullets
         // that may jump through something relatively thin
 
-        // quad tree cells are essentially aabbs, use for checks later
-
-        // think about entity size and that effecting min quad tree cell size
-
-        // cache all entities inside of each quad tree square
-
         // recursively despawn and spawn entities
 
         // think about how to implement sleeping entities, have a supplier for them?
@@ -75,14 +69,6 @@ namespace Metaitus
         {
             this.cellSize = cellSize;
         }
-
-        /*
-        public MEntity SpawnEntity(MVec2D position, MVec2D velocity, MAABBCollider[] colliders, MAABBCollider[] aabbTriggers, MCircleCollider[] circleTriggers, float drag = 0)
-        {
-            MEntity entity = new MEntity(this, position, velocity, NextId, colliders, aabbTriggers, circleTriggers, drag);
-            return entity;
-        }
-        */
 
         public MCell EnsureCell(MVec2D pos)
         {

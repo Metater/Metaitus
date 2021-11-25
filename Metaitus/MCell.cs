@@ -11,6 +11,7 @@ namespace Metaitus
         public readonly ulong index;
         public readonly List<MEntity> entities = new List<MEntity>();
         public readonly List<MCollider> staticColliders = new List<MCollider>();
+        public readonly List<MTrigger> staticTriggers = new List<MTrigger>();
 
         public MCell(ulong index)
         {

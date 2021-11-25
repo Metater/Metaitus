@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31005.135
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metaitus", "Metaitus\Metaitus.csproj", "{96E05D28-A849-4CE7-B660-61A683DB05ED}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetaitusTesting", "MetaitusTesting\MetaitusTesting.csproj", "{1415776A-047F-48EA-AF9F-CD26AC945A73}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetaitusAgent", "MetaitusAgent\MetaitusAgent.csproj", "{2EB8F510-0B19-4137-87C3-384E891A0DA5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MetaitusShared", "MetaitusShared\MetaitusShared.csproj", "{B58A6E3D-63D2-44A9-9714-A16A99ECC711}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +19,14 @@ Global
 		{96E05D28-A849-4CE7-B660-61A683DB05ED}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{96E05D28-A849-4CE7-B660-61A683DB05ED}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{96E05D28-A849-4CE7-B660-61A683DB05ED}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1415776A-047F-48EA-AF9F-CD26AC945A73}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1415776A-047F-48EA-AF9F-CD26AC945A73}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1415776A-047F-48EA-AF9F-CD26AC945A73}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1415776A-047F-48EA-AF9F-CD26AC945A73}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2EB8F510-0B19-4137-87C3-384E891A0DA5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EB8F510-0B19-4137-87C3-384E891A0DA5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EB8F510-0B19-4137-87C3-384E891A0DA5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EB8F510-0B19-4137-87C3-384E891A0DA5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B58A6E3D-63D2-44A9-9714-A16A99ECC711}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B58A6E3D-63D2-44A9-9714-A16A99ECC711}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B58A6E3D-63D2-44A9-9714-A16A99ECC711}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B58A6E3D-63D2-44A9-9714-A16A99ECC711}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

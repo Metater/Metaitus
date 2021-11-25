@@ -1,5 +1,5 @@
 ﻿using Metaitus.Interfaces;
-using Metaitus.Types;
+using MetaitusShared.Types;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,6 +8,9 @@ namespace Metaitus.Physics
 {
     public class MCollider
     {
+
+        // collider with list of positions it exists at
+        // colliders that use use inheritance and dont contain unnessary things, but more complexity involved
         public bool IsStatic { get; protected set; }
         public MVec2F Min { get; protected set; }
         public MVec2F Max { get; protected set; }
@@ -120,46 +123,4 @@ namespace Metaitus.Physics
             collisionHandlers.ForEach((h) => h.Touched(this, toucher));
         }
     }
-    /*
-    public abstract class MCollider
-    {
-        public MVec2F offset = MVec2F.zero;
-        public bool isTrigger;
-        public ICollisionHandler CollisionHandler { get; protected set; }
-        public ulong Id { get; protected set; }
-        public ushort[] Tags { get; protected set; }
-    }
-
-    public sealed class MAABBCollider : MCollider
-    {
-        public readonly MVec2F min;
-        public readonly MVec2F max;
-
-        public MAABBCollider(MVec2F min, MVec2F max, MVec2F offset, bool isTrigger, ICollisionHandler collisionHandler, ulong id, ushort[] tags = null)
-        {
-            this.min = min;
-            this.max = max;
-            base.offset = offset;
-            base.isTrigger = isTrigger;
-            CollisionHandler = collisionHandler;
-            Id = id;
-            Tags = tags;
-        }
-    }
-
-    public sealed class MCircleCollider : MCollider
-    {
-        public readonly float radius;
-
-        public MCircleCollider(float radius, MVec2F offset, ICollisionHandler collisionHandler, ulong id, ushort[] tags = null)
-        {
-            this.radius = radius;
-            base.offset = offset;
-            CollisionHandler = collisionHandler;
-            Id = id;
-            Tags = tags;
-            isTrigger = true;
-        }
-    }
-    */
 }

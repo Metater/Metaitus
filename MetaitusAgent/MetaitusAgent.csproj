@@ -4,10 +4,6 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <OutputPath>E:\Projects\Unity\Metaitus\Assets\Metaitus\</OutputPath>
-  </PropertyGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\MetaitusShared\MetaitusShared.csproj" />
   </ItemGroup>

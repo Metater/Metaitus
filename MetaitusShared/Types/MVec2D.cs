@@ -1,6 +1,7 @@
 using System.Numerics;
+using MetaitusShared.Types;
 
-namespace Metaitus.Types
+namespace MetaitusShared.Types
 {
     public struct MVec2D
     {

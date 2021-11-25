@@ -1,5 +1,5 @@
 using Metaitus.Interfaces;
-using Metaitus.Types;
+using MetaitusShared.Types;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -18,14 +18,14 @@ namespace Metaitus.Physics
         public readonly List<MCollider> colliders;
         public readonly List<MTrigger> triggers;
 
-        public float drag;
+        private readonly Func<MVec2D, float> GetDragFromVelocity;
 
         public readonly HashSet<string> tags = new HashSet<string>();
 
         public MCell Cell { get; private set; }
 
         private readonly List<MCell> cells = new List<MCell>(9);
-        private readonly List<MCollider> biaxialCollisions;
+        private readonly List<MCollider> biaxialIntersects;
 
         // later support static entities, they cant move, colliders still maybe?
 
@@ -60,7 +60,16 @@ namespace Metaitus.Physics
         // bounding boxes, to see if a more complex object can collide with anything
         // optimizations ^^
 
-        public MEntity(MZone zone, ulong id, MVec2D position, MVec2D velocity, List<MCollider> colliders, List<MTrigger> triggers, float drag = 0)
+        // cell caching if remove in good way???? may not work
+
+        // later cache if other entities moved, use for sending collision events, if want to be really fast??
+
+        // opptimization
+        // with storing the static trigger intersects you have to account for the parent not existing or being deleted,
+        // howeve works with statics no parent entity actually, just handle later
+        // you dont need additional compliexity currently
+
+        public MEntity(MZone zone, ulong id, MVec2D position, MVec2D velocity, List<MCollider> colliders, List<MTrigger> triggers, Func<MVec2D, float> GetDragFromVelocity = null)
         {
             this.zone = zone;
             this.id = id;
@@ -70,12 +79,12 @@ namespace Metaitus.Physics
 
             this.colliders = colliders;
             colliders?.ForEach((c) => c.SetEntity(this));
-            biaxialCollisions = new List<MCollider>(colliders == null ? 0 : colliders.Count);
+            biaxialIntersects = new List<MCollider>(colliders == null ? 0 : colliders.Count);
 
             this.triggers = triggers;
             triggers?.ForEach((c) => c.SetEntity(this));
 
-            this.drag = drag;
+            this.GetDragFromVelocity = GetDragFromVelocity;
 
             Cell = zone.EnsureCell(position);
             Cell.entities.Add(this);
@@ -86,40 +95,37 @@ namespace Metaitus.Physics
             cells.Clear();
             zone.GetCellAndSurrounding(Position, cells);
 
-            foreach (MCell cell in cells)
+            if (Velocity.x != 0 && Math.Abs(Velocity.x) < 0.0625d) Velocity *= new MVec2D(0, 1);
+            if (Velocity.y != 0 && Math.Abs(Velocity.y) < 0.0625d) Velocity *= new MVec2D(1, 0);
+            if (Velocity.x == 0 && Velocity.y == 0) // Entity cannot not move, has no velocity
             {
-                foreach (MEntity entity in cell.entities)
-                {
-                    if (entity == this) continue;
-                    foreach (MTrigger trigger in entity.triggers)
-                        CheckTriggers(trigger);
-                }
-            }
 
-            if (Velocity.x == 0 && Velocity.y == 0) return;
-            if (Math.Abs(Velocity.x) < 0.0625d && Math.Abs(Velocity.y) < 0.0625d)
-            {
-                Velocity = MVec2D.zero;
             }
-            else
+            else if (Move(timestep))
             {
-                if (Move(timestep))
+                MCell last = Cell;
+                Cell = zone.EnsureCell(Position);
+                // Optimization
+                // Benefits of not fixing, certain surrounding cells cachable??
+                // maybe not that important already fast lookup
+                // Need a runtime static loading system later
+                if (last != Cell)
                 {
-                    MCell last = Cell;
-                    Cell = zone.EnsureCell(Position);
-                    // Need a runtime static loading system later
-                    if (last != Cell)
+                    last.entities.Remove(this);
+                    Cell.entities.Add(this);
+                    if (last.entities.Count == 0)
                     {
-                        last.entities.Remove(this);
-                        Cell.entities.Add(this);
-                        if (last.entities.Count == 0)
-                        {
-                            //zone.RemoveCell(last.index);
-                        }
+                        //zone.RemoveCell(last.index);
                     }
                 }
-                if (drag != 0) Velocity *= 1 - (timestep * drag);
+                if (GetDragFromVelocity != null) Velocity *= 1 - (timestep * GetDragFromVelocity(Velocity));
             }
+            else // Just stopped moving completely on both axes
+            {
+
+            }
+
+            CheckTriggers();
         }
 
         // make another force that is added every tick and is scaled based on timestep?
@@ -130,16 +136,18 @@ namespace Metaitus.Physics
 
         private bool Move(float timestep)
         {
-            bool moved = true;
-            MVec2D lastPos = Position;
+            if (colliders == null || colliders.Count == 0)
+            {
+                Position += Velocity * timestep;
+                return true;
+            }
 
             MVec2D usualPos = Position + (Velocity * timestep);
-
             MVec2D xDelta = new MVec2D(Velocity.x * timestep, 0);
             MVec2D yDelta = new MVec2D(0, Velocity.y * timestep);
 
-            bool canMoveX = true;
-            bool canMoveY = true;
+            bool canMoveX = Velocity.x != 0;
+            bool canMoveY = Velocity.y != 0;
 
             foreach (MCell cell in cells)
             {
@@ -149,12 +157,12 @@ namespace Metaitus.Physics
                     {
                         if (canMoveX)
                         {
-                            if (IsColliding(lastPos + xDelta, staticCollider, false))
+                            if (IsColliding(Position + xDelta, staticCollider, false))
                                 canMoveX = false;
                         }
                         if (canMoveY)
                         {
-                            if (IsColliding(lastPos + yDelta, staticCollider, false))
+                            if (IsColliding(Position + yDelta, staticCollider, false))
                                 canMoveY = false;
                         }
                     }
@@ -166,10 +174,25 @@ namespace Metaitus.Physics
             if (canMoveY) Position += yDelta;
             else Velocity *= new MVec2D(1, 0);
 
-            return moved;
+            return canMoveX || canMoveY;
         }
 
-        public void CheckTriggers(MTrigger otherTrigger)
+        public void CheckTriggers()
+        {
+            foreach (MCell cell in cells)
+            {
+                foreach (MEntity entity in cell.entities)
+                {
+                    if (entity == this) continue;
+                    foreach (MTrigger otherTrigger in entity.triggers)
+                        CheckTriggersAgainstOther(otherTrigger);
+                }
+                foreach (MTrigger trigger in cell.staticTriggers)
+                    CheckTriggersAgainstOther(trigger);
+            }
+        }
+
+        public void CheckTriggersAgainstOther(MTrigger otherTrigger)
         {
             foreach (MTrigger trigger in triggers)
             {
@@ -184,20 +207,20 @@ namespace Metaitus.Physics
             bool collided = false;
             if (biaxial)
             {
-                biaxialCollisions.Clear();
+                biaxialIntersects.Clear();
                 foreach (MCollider collider in colliders)
                 {
                     if (collider.Intersects(position, staticCollider))
                     {
                         collided = true;
                         if (collider.HasCollisionHandlers) collider.Touched(staticCollider);
-                        biaxialCollisions.Add(collider);
+                        biaxialIntersects.Add(collider);
                     }
                 }
             }
             else
             {
-                foreach (MCollider collider in biaxialCollisions)
+                foreach (MCollider collider in biaxialIntersects)
                 {
                     if (collider.Intersects(position, staticCollider))
                     {

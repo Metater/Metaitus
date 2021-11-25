@@ -1,6 +1,6 @@
 using System;
 
-namespace Metaitus.Types
+namespace MetaitusShared.Types
 {
     public struct MVec2F
     {

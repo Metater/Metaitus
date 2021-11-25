@@ -1,6 +1,6 @@
 using Metaitus.Interfaces;
 using Metaitus.Physics;
-using Metaitus.Types;
+using MetaitusShared.Types;
 using System.Collections.Generic;
 
 public abstract class MTrigger

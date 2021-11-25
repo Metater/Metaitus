@@ -1,4 +1,4 @@
-using Metaitus.Types;
+using MetaitusShared.Types;
 
 namespace Metaitus.Physics
 {

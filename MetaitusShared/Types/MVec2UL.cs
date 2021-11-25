@@ -1,4 +1,4 @@
-﻿namespace Metaitus.Types
+﻿namespace MetaitusShared.Types
 {
     public struct MVec2UL
     {

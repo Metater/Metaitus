@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Metaitus.Types
+namespace MetaitusShared.Types
 {
     public static class Extensions
     {
