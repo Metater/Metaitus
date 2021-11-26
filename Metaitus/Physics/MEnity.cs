@@ -69,6 +69,8 @@ namespace Metaitus.Physics
         // howeve works with statics no parent entity actually, just handle later
         // you dont need additional compliexity currently
 
+        // speed limit maybe?
+
         public MEntity(MZone zone, ulong id, MVec2D position, MVec2D velocity, List<MCollider> colliders, List<MTrigger> triggers, Func<MVec2D, float> GetDragFromVelocity = null)
         {
             this.zone = zone;
