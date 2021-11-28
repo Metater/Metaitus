@@ -56,7 +56,6 @@ namespace Metaitus
         // hold off on aabb triggers, do circle triggers
 
         public readonly double cellSize;
-        // Not accounding for cellSize plus max
         public double MaxPosDimension => (2147483648d * cellSize) - 1d;
         public double MaxNegDimension => -2147483648d * cellSize;
         public ulong NextId => nextId++;
